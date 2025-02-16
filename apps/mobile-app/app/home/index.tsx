@@ -11,30 +11,35 @@ import StatusCard from "./_component/status-card";
 import MenuButton from "./_component/menu-btn";
 import Icon from "react-native-vector-icons/Feather";
 import * as Notifications from "expo-notifications";
-import { router } from "expo-router";
+import { Route, router } from "expo-router";
 
 const HomeScreen = () => {
   const [pushToken, setPushToken] = useState("");
 
   const menuItems = [
-    { id: 1, title: "Assignment", icon: "book-open", url: "/assignment" },
-    { id: 2, title: "Assignments", icon: "clipboard" },
-    { id: 3, title: "Holidays", icon: "calendar" },
-    { id: 4, title: "Time Table", icon: "clock" },
-    { id: 5, title: "Result", icon: "file-text" },
-    { id: 6, title: "DateSheet", icon: "calendar" },
-    { id: 7, title: "Syllabus", icon: "list" },
-    { id: 8, title: "Notices", icon: "bell" },
-    { id: 9, title: "Library", icon: "book" },
-    { id: 11, title: "Sports", icon: "book" },
-    { id: 12, title: "Sports", icon: "book" },
-    { id: 13, title: "Sports", icon: "book" },
-    { id: 14, title: "Sports", icon: "book" },
-    { id: 15, title: "Sports", icon: "book" },
-    { id: 16, title: "Sports", icon: "book" },
-    { id: 17, title: "Sports", icon: "book" },
-    { id: 18, title: "Sports", icon: "book" },
-    { id: 19, title: "Sports", icon: "book" },
+    {
+      id: 1,
+      title: "Assignment",
+      icon: "book-open",
+      url: "/assignment/pending-assignment",
+    },
+    { id: 2, title: "Schedule", icon: "clock", url: "/schedule" },
+    { id: 3, title: "Holidays", icon: "calendar", url: "/schedule" },
+    { id: 4, title: "Time Table", icon: "clock", url: "/schedule" },
+    { id: 5, title: "Result", icon: "file-text", url: "/schedule" },
+    { id: 6, title: "DateSheet", icon: "calendar", url: "/schedule" },
+    { id: 7, title: "Syllabus", icon: "list", url: "/schedule" },
+    { id: 8, title: "Notices", icon: "bell", url: "/schedule" },
+    { id: 9, title: "Library", icon: "book", url: "/schedule" },
+    { id: 11, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 12, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 13, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 14, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 15, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 16, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 17, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 18, title: "Sports", icon: "book", url: "/schedule" },
+    { id: 19, title: "Sports", icon: "book", url: "/schedule" },
   ];
 
   useEffect(() => {
@@ -179,7 +184,7 @@ const HomeScreen = () => {
             key={item.id + index}
             title={item.title}
             icon={item.icon}
-            onPress={() => router.push("/assignment")}
+            onPress={() => router.push(item.url as Route)}
           />
         ))}
       </ScrollView>
