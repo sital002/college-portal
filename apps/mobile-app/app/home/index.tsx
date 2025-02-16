@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,15 @@ import {
 } from "react-native";
 import StatusCard from "./_component/status-card";
 import MenuButton from "./_component/menu-btn";
+import Icon from "react-native-vector-icons/Feather";
+import * as Notifications from "expo-notifications";
+import { router } from "expo-router";
 
 const HomeScreen = () => {
+  const [pushToken, setPushToken] = useState("");
+
   const menuItems = [
-    { id: 1, title: "Take Quiz", icon: "book-open" },
+    { id: 1, title: "Assignment", icon: "book-open", url: "/assignment" },
     { id: 2, title: "Assignments", icon: "clipboard" },
     { id: 3, title: "Holidays", icon: "calendar" },
     { id: 4, title: "Time Table", icon: "clock" },
@@ -21,22 +26,133 @@ const HomeScreen = () => {
     { id: 7, title: "Syllabus", icon: "list" },
     { id: 8, title: "Notices", icon: "bell" },
     { id: 9, title: "Library", icon: "book" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
-    { id: 10, title: "Sports", icon: "football" },
+    { id: 11, title: "Sports", icon: "book" },
+    { id: 12, title: "Sports", icon: "book" },
+    { id: 13, title: "Sports", icon: "book" },
+    { id: 14, title: "Sports", icon: "book" },
+    { id: 15, title: "Sports", icon: "book" },
+    { id: 16, title: "Sports", icon: "book" },
+    { id: 17, title: "Sports", icon: "book" },
+    { id: 18, title: "Sports", icon: "book" },
+    { id: 19, title: "Sports", icon: "book" },
   ];
 
+  useEffect(() => {
+    // Request permission to show push notifications
+    async function requestPermissions() {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to receive notifications was denied");
+      }
+      console.log(status);
+    }
+
+    // Get the push token only after permission is granted
+    async function getPushToken() {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status === "granted") {
+        const token = await Notifications.getExpoPushTokenAsync();
+        console.log("token", token);
+        console.log("Push token:", token.data); // Save this token to send notifications later
+        setPushToken(token.data); // Update state with push token
+      } else {
+        console.log("Notification permission not granted.");
+      }
+    }
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+
+    requestPermissions().then(() => {
+      getPushToken();
+    });
+
+    // Handle incoming notifications
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received:", notification);
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pushToken) return;
+    // Send a push notification
+
+    const sendNotification = async () => {
+      const message = {
+        to: pushToken,
+        sound: "default",
+        title: "Hello, Ayesha",
+        body: "Welcome to your dashboard!",
+        data: { data: "goes here" },
+      };
+
+      const response = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Accept-encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      });
+
+      const data = await response.json();
+      console.log("Notification sent:", data);
+    };
+
+    const timer = setInterval(sendNotification, 5000);
+    // const timer = setInterval(sendNotification, 5000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          <Text style={styles.greeting}>Hi Ayesha</Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              position: "relative",
+            }}
+          >
+            <Text style={styles.greeting}>Hi Ayesha</Text>
+            <Icon
+              onPress={() => router.push("/notification")}
+              name="bell"
+              size={28}
+              color="black"
+            />
+            <Text
+              style={{
+                position: "absolute",
+                top: -7,
+                left: 138,
+                backgroundColor: "#4267B2",
+                color: "white",
+                borderRadius: 50,
+                padding: 3,
+                cursor: "pointer",
+              }}
+            >
+              12
+            </Text>
+          </View>
           <Text style={styles.classInfo}>Class X-A | Roll no. 12</Text>
         </View>
         <Image
@@ -58,12 +174,12 @@ const HomeScreen = () => {
         contentContainerStyle={styles.menuGrid}
         keyboardShouldPersistTaps="handled"
       >
-        {menuItems.map((item) => (
+        {menuItems.map((item, index) => (
           <MenuButton
-            key={item.id}
+            key={item.id + index}
             title={item.title}
             icon={item.icon}
-            onPress={() => console.log(`${item.title} pressed`)}
+            onPress={() => router.push("/assignment")}
           />
         ))}
       </ScrollView>
