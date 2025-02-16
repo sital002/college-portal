@@ -24,7 +24,7 @@ const HomeScreen = () => {
       url: "/assignment/pending-assignment",
     },
     { id: 2, title: "Schedule", icon: "clock", url: "/schedule" },
-    { id: 3, title: "Holidays", icon: "calendar", url: "/schedule" },
+    { id: 3, title: "Notices", icon: "bell", url: "/notice" },
     { id: 4, title: "Time Table", icon: "clock", url: "/schedule" },
     { id: 5, title: "Result", icon: "file-text", url: "/schedule" },
     { id: 6, title: "DateSheet", icon: "calendar", url: "/schedule" },
@@ -98,7 +98,7 @@ const HomeScreen = () => {
         to: pushToken,
         sound: "default",
         title: "Hello, Ayesha",
-        body: "Welcome to your dashboard!",
+        body: "Welcome to your dashboard!,this is demo notification ",
         data: { data: "goes here" },
       };
 
