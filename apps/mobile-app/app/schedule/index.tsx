@@ -1,299 +1,186 @@
-// components/ClassSchedule.tsx
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
+  StyleSheet,
+  Animated,
   Dimensions,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
 
-interface Period {
+interface Subject {
   id: string;
-  subject: string;
+  name: string;
   teacher: string;
   startTime: string;
   endTime: string;
-  room: string;
+  color: string;
 }
 
-interface DaySchedule {
-  day: string;
-  periods: Period[];
-}
+const { width } = Dimensions.get("window");
 
-const schedule: DaySchedule[] = [
-  {
-    day: "Monday",
-    periods: [
-      {
-        id: "1",
-        subject: "Mathematics",
-        teacher: "Mr. Johnson",
-        startTime: "08:00",
-        endTime: "08:45",
-        room: "Room 101",
-      },
-      {
-        id: "2",
-        subject: "English",
-        teacher: "Mrs. Smith",
-        startTime: "09:00",
-        endTime: "09:45",
-        room: "Room 102",
-      },
-      {
-        id: "3",
-        subject: "Physics",
-        teacher: "Dr. Brown",
-        startTime: "10:00",
-        endTime: "10:45",
-        room: "Lab 201",
-      },
-      {
-        id: "4",
-        subject: "Break",
-        teacher: "-",
-        startTime: "10:45",
-        endTime: "11:15",
-        room: "-",
-      },
-      {
-        id: "5",
-        subject: "Chemistry",
-        teacher: "Ms. Davis",
-        startTime: "11:15",
-        endTime: "12:00",
-        room: "Lab 202",
-      },
-      {
-        id: "6",
-        subject: "History",
-        teacher: "Mr. Wilson",
-        startTime: "12:15",
-        endTime: "13:00",
-        room: "Room 103",
-      },
-    ],
-  },
-  // Add more days here
-];
-
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-
-export const ClassSchedule: React.FC = () => {
-  const [selectedDay, setSelectedDay] = useState("Monday");
-  const [expandedPeriod, setExpandedPeriod] = useState<string | null>(null);
-
-  const todaySchedule =
-    schedule.find((s) => s.day === selectedDay) || schedule[0];
-
-  const getStatusColor = (startTime: string): string => {
-    const now = new Date();
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const periodTime = new Date();
-    periodTime.setHours(hours, minutes);
-
-    if (now.getHours() === hours && now.getMinutes() >= minutes) {
-      return "#4F46E5"; // Current period
-    }
-    return now > periodTime ? "#9CA3AF" : "#059669"; // Past or upcoming
-  };
+const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
+  const sortedSubjects = [...subjects].sort((a, b) =>
+    a.startTime.localeCompare(b.startTime)
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Class Schedule</Text>
-        <Text style={styles.headerSubtitle}>Class VIII-A</Text>
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.header}>Today's Schedule</Text>
+      <ScrollView style={styles.scrollView}>
+        {sortedSubjects.map((subject, index) => {
+          const fadeAnim = new Animated.Value(0);
+          const slideAnim = new Animated.Value(50);
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.daysContainer}
-      >
-        {days.map((day) => (
-          <TouchableOpacity
-            key={day}
-            style={[
-              styles.dayButton,
-              selectedDay === day && styles.selectedDayButton,
-            ]}
-            onPress={() => setSelectedDay(day)}
-          >
-            <Text
+          useEffect(() => {
+            Animated.parallel([
+              Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                delay: index * 100,
+                useNativeDriver: true,
+              }),
+              Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 500,
+                delay: index * 100,
+                useNativeDriver: true,
+              }),
+            ]).start();
+          }, []);
+
+          return (
+            <Animated.View
+              key={subject.id}
               style={[
-                styles.dayText,
-                selectedDay === day && styles.selectedDayText,
+                styles.subjectCard,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
               ]}
             >
-              {day}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <LinearGradient
+                colors={[subject.color, subject.color + "99"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradientBackground}
+              >
+                <View style={styles.timeContainer}>
+                  <MaterialIcons name="access-time" size={20} color="white" />
+                  <Text style={styles.timeText}>
+                    {subject.startTime} - {subject.endTime}
+                  </Text>
+                </View>
 
-      <ScrollView style={styles.scheduleContainer}>
-        {todaySchedule.periods.map((period) => (
-          <TouchableOpacity
-            key={period.id}
-            style={styles.periodCard}
-            onPress={() =>
-              setExpandedPeriod(expandedPeriod === period.id ? null : period.id)
-            }
-          >
-            <View style={styles.periodHeader}>
-              <View style={styles.timeContainer}>
-                <View
-                  style={[
-                    styles.statusDot,
-                    { backgroundColor: getStatusColor(period.startTime) },
-                  ]}
-                />
-                <Text style={styles.timeText}>
-                  {period.startTime} - {period.endTime}
-                </Text>
-              </View>
-              <MaterialIcons
-                name={
-                  expandedPeriod === period.id ? "expand-less" : "expand-more"
-                }
-                size={24}
-                color="#6B7280"
-              />
-            </View>
-
-            <View style={styles.subjectContainer}>
-              <Text style={styles.subjectText}>{period.subject}</Text>
-              {expandedPeriod === period.id && (
-                <View style={styles.expandedInfo}>
-                  <View style={styles.infoRow}>
-                    <MaterialIcons name="person" size={20} color="#6B7280" />
-                    <Text style={styles.infoText}>{period.teacher}</Text>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <MaterialIcons name="room" size={20} color="#6B7280" />
-                    <Text style={styles.infoText}>{period.room}</Text>
+                <View style={styles.subjectInfo}>
+                  <Text style={styles.subjectName}>{subject.name}</Text>
+                  <View style={styles.teacherContainer}>
+                    <MaterialIcons name="person" size={16} color="white" />
+                    <Text style={styles.teacherName}>{subject.teacher}</Text>
                   </View>
                 </View>
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
+              </LinearGradient>
+            </Animated.View>
+          );
+        })}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#f8f9fa",
+    padding: 16,
   },
   header: {
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#2d3436",
+    marginBottom: 20,
+    marginTop: 40,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#111827",
+  scrollView: {
+    flex: 1,
   },
-  headerSubtitle: {
-    fontSize: 16,
-    color: "#6B7280",
-    marginTop: 4,
-  },
-  daysContainer: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-  },
-  dayButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    marginHorizontal: 4,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    height: 35,
-  },
-  selectedDayButton: {
-    backgroundColor: "#4F46E5",
-  },
-  dayText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#6B7280",
-  },
-  selectedDayText: {
-    color: "#FFFFFF",
-  },
-  scheduleContainer: {
-    padding: 16,
-  },
-  periodCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+  subjectCard: {
+    marginBottom: 16,
+    borderRadius: 16,
+    elevation: 4,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowRadius: 4,
   },
-  periodHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  gradientBackground: {
+    padding: 20,
+    borderRadius: 16,
+    minHeight: 120,
   },
   timeContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
+    marginBottom: 12,
   },
   timeText: {
-    fontSize: 14,
-    color: "#6B7280",
+    color: "white",
+    fontSize: 16,
+    marginLeft: 8,
     fontWeight: "500",
   },
-  subjectContainer: {
-    marginTop: 8,
+  subjectInfo: {
+    flex: 1,
   },
-  subjectText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  expandedInfo: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
+  subjectName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
     marginBottom: 8,
   },
-  infoText: {
+  teacherContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  teacherName: {
+    color: "white",
+    fontSize: 16,
     marginLeft: 8,
-    fontSize: 14,
-    color: "#374151",
   },
 });
 
-export default ClassSchedule;
+// Example usage
+const sampleSubjects: Subject[] = [
+  {
+    id: "1",
+    name: "Mathematics",
+    teacher: "Dr. Smith",
+    startTime: "09:00",
+    endTime: "10:30",
+    color: "#FF6B6B",
+  },
+  {
+    id: "2",
+    name: "Physics",
+    teacher: "Prof. Johnson",
+    startTime: "11:00",
+    endTime: "12:30",
+    color: "#4ECDC4",
+  },
+  {
+    id: "3",
+    name: "Chemistry",
+    teacher: "Dr. Williams",
+    startTime: "14:00",
+    endTime: "15:30",
+    color: "#45B7D1",
+  },
+];
+
+export default () => <Schedule subjects={sampleSubjects} />;
