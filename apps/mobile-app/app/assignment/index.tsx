@@ -98,7 +98,7 @@ const AssignmentUploadForm: React.FC = () => {
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Create New Assignment</Text>
+          <Text style={styles.formTitle}>Upload Assignment</Text>
 
           {Object.entries(formData).map(([field, value]) => (
             <InputField

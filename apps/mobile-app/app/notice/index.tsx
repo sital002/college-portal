@@ -6,13 +6,16 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
+  Linking,
 } from "react-native";
+import  Icon  from "react-native-vector-icons/FontAwesome";
 
 interface Notice {
   id: string;
   title: string;
   description: string;
   date: string;
+  fileUrl?: string; // Optional file URL for downloading
 }
 
 const notices: Notice[] = [
@@ -22,6 +25,7 @@ const notices: Notice[] = [
     description:
       "Final exams are postponed by a week. Check the website for updated schedules.",
     date: "Feb 20, 2025",
+    fileUrl: "https://example.com/exam-schedule.pdf", // Example file URL
   },
   {
     id: "2",
@@ -52,6 +56,12 @@ const NoticeCard: React.FC<{ notice: Notice; onPress: () => void }> = ({
 const NoticePage: React.FC = () => {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
 
+  const handleDownload = (fileUrl: string) => {
+    Linking.openURL(fileUrl).catch((err) =>
+      console.error("Error opening file", err)
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Notices</Text>
@@ -74,12 +84,25 @@ const NoticePage: React.FC = () => {
                   {selectedNotice.description}
                 </Text>
                 <Text style={styles.modalDate}>{selectedNotice.date}</Text>
+
                 <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => setSelectedNotice(null)}
                 >
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
+                {/* Conditional rendering of Download File Button */}
+                {selectedNotice.fileUrl && (
+                  <TouchableOpacity
+                    style={styles.downloadButton}
+                    onPress={() =>
+                      handleDownload(selectedNotice.fileUrl as string)
+                    }
+                  >
+                    <Icon name="download" size={15} color="#FFF" />
+                  </TouchableOpacity>
+                )}
+
               </>
             )}
           </View>
@@ -166,6 +189,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   closeButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  downloadButton: {
+    backgroundColor: "#10B981",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  downloadButtonText: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
