@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -21,71 +22,112 @@ interface Subject {
 
 const { width } = Dimensions.get("window");
 
+const generateSchedule = (
+  subjects: Omit<Subject, "startTime" | "endTime">[]
+) => {
+  const startTime = 9 * 60; // Start at 09:00 AM (in minutes)
+  const periodDuration = 90; // 1 hour 30 minutes
+  return subjects.map((subject, index) => {
+    const start = startTime + index * periodDuration;
+    const end = start + periodDuration;
+
+    const formatTime = (minutes: number) => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+    };
+
+    return {
+      ...subject,
+      startTime: formatTime(start),
+      endTime: formatTime(end),
+    };
+  });
+};
+
 const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
-  const sortedSubjects = [...subjects].sort((a, b) =>
-    a.startTime.localeCompare(b.startTime)
-  );
+  const [scheduledSubjects, setScheduledSubjects] = useState<Subject[]>([]);
+  const [animations, setAnimations] = useState<
+    { fade: Animated.Value; slide: Animated.Value }[]
+  >([]);
+
+  useEffect(() => {
+    setAnimations(
+      subjects.map(() => ({
+        fade: new Animated.Value(0),
+        slide: new Animated.Value(50),
+      }))
+    );
+  }, [subjects]);
+
+  const handleGenerateSchedule = () => {
+    // Shuffle subjects array to get a new order
+    const shuffledSubjects = [...subjects].sort(() => Math.random() - 0.5);
+
+    // Generate schedule with new order
+    const newSchedule = generateSchedule(shuffledSubjects);
+    setScheduledSubjects(newSchedule);
+
+    // Start animations after the schedule is set
+    newSchedule.forEach((_, index) => {
+      Animated.parallel([
+        Animated.timing(animations[index]?.fade, {
+          toValue: 1,
+          duration: 500,
+          delay: index * 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animations[index]?.slide, {
+          toValue: 0,
+          duration: 500,
+          delay: index * 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  };
+
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Today's Schedule</Text>
+      <TouchableOpacity style={styles.button} onPress={handleGenerateSchedule}>
+        <Text style={styles.buttonText}>Generate Schedule</Text>
+      </TouchableOpacity>
       <ScrollView style={styles.scrollView}>
-        {sortedSubjects.map((subject, index) => {
-          const fadeAnim = new Animated.Value(0);
-          const slideAnim = new Animated.Value(50);
-
-          useEffect(() => {
-            Animated.parallel([
-              Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 500,
-                delay: index * 100,
-                useNativeDriver: true,
-              }),
-              Animated.timing(slideAnim, {
-                toValue: 0,
-                duration: 500,
-                delay: index * 100,
-                useNativeDriver: true,
-              }),
-            ]).start();
-          }, []);
-
-          return (
-            <Animated.View
-              key={subject.id}
-              style={[
-                styles.subjectCard,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
-              ]}
+        {scheduledSubjects.map((subject, index) => (
+          <Animated.View
+            key={subject.id}
+            style={[
+              styles.subjectCard,
+              {
+                opacity: animations[index]?.fade,
+                transform: [{ translateY: animations[index]?.slide }],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={[subject.color, subject.color + "99"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientBackground}
             >
-              <LinearGradient
-                colors={[subject.color, subject.color + "99"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradientBackground}
-              >
-                <View style={styles.timeContainer}>
-                  <MaterialIcons name="access-time" size={20} color="white" />
-                  <Text style={styles.timeText}>
-                    {subject.startTime} - {subject.endTime}
-                  </Text>
+              <View style={styles.timeContainer}>
+                <MaterialIcons name="access-time" size={20} color="white" />
+                <Text style={styles.timeText}>
+                  {subject.startTime} - {subject.endTime}
+                </Text>
+              </View>
+              <View style={styles.subjectInfo}>
+                <Text style={styles.subjectName}>{subject.name}</Text>
+                <View style={styles.teacherContainer}>
+                  <MaterialIcons name="person" size={16} color="white" />
+                  <Text style={styles.teacherName}>{subject.teacher}</Text>
                 </View>
-
-                <View style={styles.subjectInfo}>
-                  <Text style={styles.subjectName}>{subject.name}</Text>
-                  <View style={styles.teacherContainer}>
-                    <MaterialIcons name="person" size={16} color="white" />
-                    <Text style={styles.teacherName}>{subject.teacher}</Text>
-                  </View>
-                </View>
-              </LinearGradient>
-            </Animated.View>
-          );
-        })}
+              </View>
+            </LinearGradient>
+          </Animated.View>
+        ))}
       </ScrollView>
     </View>
   );
@@ -103,6 +145,18 @@ const styles = StyleSheet.create({
     color: "#2d3436",
     marginBottom: 20,
     marginTop: 40,
+  },
+  button: {
+    backgroundColor: "#2d3436",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   scrollView: {
     flex: 1,
@@ -155,32 +209,26 @@ const styles = StyleSheet.create({
   },
 });
 
-// Example usage
-const sampleSubjects: Subject[] = [
+// Example subjects without predefined time
+const sampleSubjects: Omit<Subject, "startTime" | "endTime">[] = [
   {
     id: "1",
     name: "Mathematics",
     teacher: "Dr. Smith",
-    startTime: "09:00",
-    endTime: "10:30",
     color: "#FF6B6B",
   },
   {
     id: "2",
     name: "Physics",
     teacher: "Prof. Johnson",
-    startTime: "11:00",
-    endTime: "12:30",
     color: "#4ECDC4",
   },
   {
     id: "3",
     name: "Chemistry",
     teacher: "Dr. Williams",
-    startTime: "14:00",
-    endTime: "15:30",
     color: "#45B7D1",
   },
 ];
 
-export default () => <Schedule subjects={sampleSubjects} />;
+export default () => <Schedule subjects={sampleSubjects as Subject[]} />;
