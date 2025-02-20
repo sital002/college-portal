@@ -142,8 +142,6 @@ const ScheduleScreen: React.FC = () => {
         <Text style={styles.headerTitle}>Class Schedule</Text>
       </View>
 
-      
-
       <ScrollView style={styles.scheduleContainer}>
         {scheduleData[selectedDay]?.map((schedule) => (
           <ClassCard key={schedule.id} schedule={schedule} />
