@@ -25,10 +25,15 @@ const { width } = Dimensions.get("window");
 const generateSchedule = (
   subjects: Omit<Subject, "startTime" | "endTime">[]
 ) => {
-  const startTime = 9 * 60; // Start at 09:00 AM (in minutes)
-  const periodDuration = 90; // 1 hour 30 minutes
-  return subjects.map((subject, index) => {
-    const start = startTime + index * periodDuration;
+  const startTime = 9 * 60;
+  const periodDuration = 90;
+  let schedule: Subject[] = [];
+  let availableSubjects = [...subjects];
+
+  for (let i = 0; i < subjects.length; i++) {
+    const subjectIndex = Math.floor(Math.random() * availableSubjects.length);
+    const subject = availableSubjects.splice(subjectIndex, 1)[0];
+    const start = startTime + i * periodDuration;
     const end = start + periodDuration;
 
     const formatTime = (minutes: number) => {
@@ -37,12 +42,13 @@ const generateSchedule = (
       return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
     };
 
-    return {
+    schedule.push({
       ...subject,
       startTime: formatTime(start),
       endTime: formatTime(end),
-    };
-  });
+    });
+  }
+  return schedule;
 };
 
 const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
@@ -61,14 +67,10 @@ const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
   }, [subjects]);
 
   const handleGenerateSchedule = () => {
-    // Shuffle subjects array to get a new order
     const shuffledSubjects = [...subjects].sort(() => Math.random() - 0.5);
-
-    // Generate schedule with new order
     const newSchedule = generateSchedule(shuffledSubjects);
     setScheduledSubjects(newSchedule);
 
-    // Start animations after the schedule is set
     newSchedule.forEach((_, index) => {
       Animated.parallel([
         Animated.timing(animations[index]?.fade, {
@@ -86,7 +88,6 @@ const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
       ]).start();
     });
   };
-
 
   return (
     <View style={styles.container}>
@@ -165,13 +166,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 16,
     elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   gradientBackground: {
     padding: 20,
@@ -209,26 +203,10 @@ const styles = StyleSheet.create({
   },
 });
 
-// Example subjects without predefined time
 const sampleSubjects: Omit<Subject, "startTime" | "endTime">[] = [
-  {
-    id: "1",
-    name: "Mathematics",
-    teacher: "Dr. Smith",
-    color: "#FF6B6B",
-  },
-  {
-    id: "2",
-    name: "Physics",
-    teacher: "Prof. Johnson",
-    color: "#4ECDC4",
-  },
-  {
-    id: "3",
-    name: "Chemistry",
-    teacher: "Dr. Williams",
-    color: "#45B7D1",
-  },
+  { id: "1", name: "Mathematics", teacher: "Dr. Smith", color: "#FF6B6B" },
+  { id: "2", name: "Physics", teacher: "Prof. Johnson", color: "#4ECDC4" },
+  { id: "3", name: "Chemistry", teacher: "Dr. Williams", color: "#45B7D1" },
 ];
 
 export default () => <Schedule subjects={sampleSubjects as Subject[]} />;
