@@ -5,7 +5,6 @@ import {
   ScrollView,
   StyleSheet,
   Animated,
-  Dimensions,
   TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -64,7 +63,7 @@ const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
         slide: new Animated.Value(50),
       }))
     );
-  }, [subjects]);
+  }, []);
 
   const handleGenerateSchedule = () => {
     const shuffledSubjects = [...subjects].sort(() => Math.random() - 0.5);
@@ -96,9 +95,9 @@ const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
         <Text style={styles.buttonText}>Generate Schedule</Text>
       </TouchableOpacity>
       <ScrollView style={styles.scrollView}>
-        {scheduledSubjects.map((subject, index) => (
+        {scheduledSubjects.map((entry, index) => (
           <Animated.View
-            key={subject.id}
+            key={`${entry.subject}-${entry.day}-${entry.startTime}`}
             style={[
               styles.subjectCard,
               {
@@ -108,7 +107,11 @@ const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
             ]}
           >
             <LinearGradient
-              colors={[subject.color, subject.color + "99"]}
+              colors={[
+                subjects.find((s) => s.name === entry.subject)?.color ||
+                  "#4ECDC4",
+                "#4ECDC499",
+              ]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.gradientBackground}
@@ -116,14 +119,14 @@ const Schedule: React.FC<{ subjects: Subject[] }> = ({ subjects }) => {
               <View style={styles.timeContainer}>
                 <MaterialIcons name="access-time" size={20} color="white" />
                 <Text style={styles.timeText}>
-                  {subject.startTime} - {subject.endTime}
+                  {entry.startTime} - {entry.endTime}
                 </Text>
               </View>
               <View style={styles.subjectInfo}>
-                <Text style={styles.subjectName}>{subject.name}</Text>
+                <Text style={styles.subjectName}>{entry.subject}</Text>
                 <View style={styles.teacherContainer}>
                   <MaterialIcons name="person" size={16} color="white" />
-                  <Text style={styles.teacherName}>{subject.teacher}</Text>
+                  <Text style={styles.teacherName}>{entry.professor}</Text>
                 </View>
               </View>
             </LinearGradient>
