@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,11 +6,15 @@ import {
   StyleSheet,
   Animated,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface Subject {
+  professor: ReactNode;
+  subject: ReactNode;
+  day: any;
   id: string;
   name: string;
   teacher: string;
@@ -207,9 +211,33 @@ const styles = StyleSheet.create({
 });
 
 const sampleSubjects: Omit<Subject, "startTime" | "endTime">[] = [
-  { id: "1", name: "Mathematics", teacher: "Dr. Smith", color: "#FF6B6B" },
-  { id: "2", name: "Physics", teacher: "Prof. Johnson", color: "#4ECDC4" },
-  { id: "3", name: "Chemistry", teacher: "Dr. Williams", color: "#45B7D1" },
+  {
+    id: "1",
+    name: "Mathematics",
+    teacher: "Dr. Smith",
+    color: "#FF6B6B",
+    subject: undefined,
+    day: undefined,
+    professor: undefined,
+  },
+  {
+    id: "2",
+    name: "Physics",
+    teacher: "Prof. Johnson",
+    color: "#4ECDC4",
+    subject: undefined,
+    day: undefined,
+    professor: undefined,
+  },
+  {
+    id: "3",
+    name: "Chemistry",
+    teacher: "Dr. Williams",
+    color: "#45B7D1",
+    subject: undefined,
+    day: undefined,
+    professor: undefined,
+  },
 ];
 
 export default () => <Schedule subjects={sampleSubjects as Subject[]} />;

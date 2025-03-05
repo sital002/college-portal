@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -10,6 +10,18 @@ import {
 } from "react-native";
 
 const Signup = () => {
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const signupHandler = async () => {
+    const response = await fetch("http://localhost:8080/api/v1/auth/signup", {
+      method: "POST",
+      body: JSON.stringify(user),
+    });
+    console.log(response.json());
+  };
   return (
     <View style={styles.container}>
       <Image
@@ -59,6 +71,8 @@ const Signup = () => {
             margin: 20,
           }}
           placeholder="enter your email"
+          value={user.email}
+          onChangeText={(text) => setUser({ ...user, email: text })}
         />
         <TextInput
           style={{
@@ -67,6 +81,8 @@ const Signup = () => {
             margin: 20,
           }}
           placeholder="enter your username"
+          value={user.username}
+          onChangeText={(text) => setUser({ ...user, username: text })}
         />
 
         <TextInput
@@ -76,10 +92,12 @@ const Signup = () => {
             margin: 20,
           }}
           placeholder="enter your password"
+          value={user.password}
+          onChangeText={(text) => setUser({ ...user, password: text })}
         />
         <TouchableOpacity style={{}}>
           <Text
-            onPress={() => router.replace("/home")}
+            onPress={signupHandler}
             style={{
               backgroundColor: "#4C82E4",
               padding: 10,
@@ -93,7 +111,7 @@ const Signup = () => {
             SinUp
           </Text>
         </TouchableOpacity>
-       
+
         <Text
           onPress={() => router.replace("/")}
           style={{

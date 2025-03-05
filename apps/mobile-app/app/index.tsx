@@ -1,5 +1,6 @@
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axois, { isAxiosError } from "axios";
 import {
   Image,
   StyleSheet,
@@ -8,25 +9,45 @@ import {
   TouchableOpacity,
   View,
   Switch,
+  Alert,
 } from "react-native";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
   const [isTeacher, setIsTeacher] = useState(true); // Switch state for toggling roles
-
-  const handleLogin = () => {
-    // Validate email and password (you can add more checks here)
-    if (!email && !password) {
-      // Routing based on the selected role
-      if (isTeacher) {
-        router.replace("/teacher"); // Teacher's Dashboard
-      } else {
-        router.replace("/home"); // Student's Dashboard
-      }
-    }
-  };
-
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
+  const API_URL = `http://192.168.61.130:8080/api/v1`;
+  useEffect(() => {
+    axois
+      .post(
+        `${API_URL}/auth/signin`,
+        {
+          email: "test@gmail.com",
+          password: "test1234",
+        },
+        {
+          withCredentials: true,
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        console.log(response.data);
+        Alert.alert("Success", "User logged in successfully!");
+      })
+      .catch((error) => {
+        console.log(isAxiosError(error));
+        if (isAxiosError(error)) {
+          console.log(error.response);
+          // console.log(JSON.stringify(error));
+          return;
+        }
+        console.log("There was an error making the get request!", error);
+      });
+  }, []);
   return (
     <View style={styles.container}>
       <Image
@@ -44,19 +65,19 @@ const Login = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your email"
-          value={email}
-          onChangeText={setEmail}
+          value={user.email}
+          onChangeText={(text) => setUser({ ...user, email: text })}
           keyboardType="email-address"
         />
         <TextInput
           style={styles.input}
           placeholder="Enter your password"
-          value={password}
-          onChangeText={setPassword}
+          value={user.password}
+          onChangeText={(text) => setUser({ ...user, password: text })}
           secureTextEntry
         />
 
-        <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
+        <TouchableOpacity style={styles.loginButton}>
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
