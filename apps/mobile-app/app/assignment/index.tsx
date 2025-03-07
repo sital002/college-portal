@@ -12,12 +12,15 @@ import { FileUpload } from "./_components/file-upload";
 import { ErrorMessage } from "./_components/error-message";
 import { SubmitButton } from "./_components/submit-button";
 import { styles } from "./_components/style";
+import { useUser } from "@/context/context";
 
 const AssignmentUploadForm: React.FC = () => {
   const [selectedFile, setSelectedFile] =
     useState<ImagePicker.ImagePickerAsset>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
+  console.log("user", user);
 
   const handleFilePick = async () => {
     try {

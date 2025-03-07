@@ -14,28 +14,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { styles } from "./style";
+import { User } from "@/context/context";
 
-// Types
-interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  bio: string;
-  address: string;
-  birthDate: string;
-  avatar: string;
-  occupation: string;
-  socialLinks: {
-    linkedin: string;
-    twitter: string;
-    github: string;
-  };
-}
+
 
 const ProfileHeader: React.FC<{
-  profile: UserProfile;
+  profile: User;
   onEditPress: () => void;
 }> = ({ profile, onEditPress }) => (
   <LinearGradient
@@ -45,14 +29,14 @@ const ProfileHeader: React.FC<{
     <View style={styles.headerContent}>
       <View style={styles.avatarContainer}>
         <Image
-          source={{ uri: profile.avatar || "https://via.placeholder.com/150" }}
+          source={{ uri: profile.profilePicture || "https://via.placeholder.com/150" }}
           style={styles.avatar}
         />
       </View>
       <Text style={styles.name}>
         {profile.firstName} {profile.lastName}
       </Text>
-      <Text style={styles.occupation}>{profile.occupation}</Text>
+      <Text style={styles.occupation}>{profile.role}</Text>
       <TouchableOpacity style={styles.editButton} onPress={onEditPress}>
         <MaterialIcons name="edit" size={20} color="white" />
         <Text style={styles.editButtonText}>Edit Profile</Text>

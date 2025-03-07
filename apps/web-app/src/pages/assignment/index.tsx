@@ -16,8 +16,8 @@ const Assignment = () => {
           Publish Assignment
         </Link>
       </div>
-      <div className="grid grid-cols-2 justify-between">
-        <div className="p-4 my-2 h-fit rounded-md shadow-md border-2 border-gray-400 grow max-w-2xl ">
+      <div className="grid grid-cols-2 justify-between  ">
+        <div className="p-4 my-2 rounded-md shadow-md border-2 border-gray-400 grow max-w-2xl ">
           <h1 className="text-2xl font-semibold mb-2">Class 1</h1>
           <div className="space-y-5">
             <AssignmentCard />

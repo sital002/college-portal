@@ -13,13 +13,14 @@ import { styles } from "./style";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { UserProfile } from "./type";
+import { User } from "@/context/context";
 
 const EditProfileForm: React.FC<{
-  profile: UserProfile;
-  onSave: (profile: UserProfile) => void;
+  profile: User;
+  onSave: (profile: User) => void;
   onCancel: () => void;
 }> = ({ profile, onSave, onCancel }) => {
-  const [editedProfile, setEditedProfile] = useState<UserProfile>(profile);
+  const [editedProfile, setEditedProfile] = useState<User>(profile);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -30,7 +31,10 @@ const EditProfileForm: React.FC<{
     });
 
     if (!result.canceled) {
-      setEditedProfile({ ...editedProfile, avatar: result.assets[0].uri });
+      setEditedProfile({
+        ...editedProfile,
+        profilePicture: result.assets[0].uri,
+      });
     }
   };
 
@@ -45,7 +49,7 @@ const EditProfileForm: React.FC<{
           onPress={pickImage}
         >
           <Image
-            source={{ uri: editedProfile.avatar }}
+            source={{ uri: editedProfile.profilePicture }}
             style={styles.editAvatar}
           />
           <View style={styles.editAvatarOverlay}>
@@ -74,39 +78,32 @@ const EditProfileForm: React.FC<{
             setEditedProfile({ ...editedProfile, email: text })
           }
           keyboardType="email-address"
+          readOnly
         />
         <Input
           label="Phone"
-          value={editedProfile.phone}
+          value={editedProfile.phoneNumber}
           onChangeText={(text) =>
-            setEditedProfile({ ...editedProfile, phone: text })
+            setEditedProfile({ ...editedProfile, phoneNumber: text })
           }
           keyboardType="phone-pad"
         />
         <Input
           label="Occupation"
-          value={editedProfile.occupation}
+          value={editedProfile.role}
           onChangeText={(text) =>
-            setEditedProfile({ ...editedProfile, occupation: text })
+            setEditedProfile({ ...editedProfile, role: text })
           }
         />
-        <Input
-          label="Bio"
-          value={editedProfile.bio}
-          onChangeText={(text) =>
-            setEditedProfile({ ...editedProfile, bio: text })
-          }
-          multiline
-          numberOfLines={4}
-        />
-        <Input
+
+        {/* <Input
           label="Address"
           value={editedProfile.address}
           onChangeText={(text) =>
             setEditedProfile({ ...editedProfile, address: text })
           }
           multiline
-        />
+        /> */}
 
         <View style={styles.editButtonsContainer}>
           <TouchableOpacity

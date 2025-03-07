@@ -8,6 +8,7 @@ const Input: React.FC<{
   multiline?: boolean;
   numberOfLines?: number;
   keyboardType?: "default" | "email-address" | "phone-pad";
+  readOnly?: boolean;
 }> = ({
   label,
   value,
@@ -15,6 +16,7 @@ const Input: React.FC<{
   multiline,
   numberOfLines,
   keyboardType,
+  readOnly,
 }) => (
   <View style={styles.inputContainer}>
     <Text style={styles.inputLabel}>{label}</Text>
@@ -28,6 +30,7 @@ const Input: React.FC<{
       multiline={multiline}
       numberOfLines={numberOfLines}
       keyboardType={keyboardType}
+      readOnly={readOnly}
     />
   </View>
 );

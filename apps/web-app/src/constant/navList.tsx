@@ -8,7 +8,7 @@ export const navList = [
   },
   {
     name: "Assignments",
-    url: "/assignments",
+    url: "/assignment",
     icon: <Pen strokeWidth={2} />,
   },
   {

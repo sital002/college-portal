@@ -9,12 +9,15 @@ import {
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useUser } from "@/context/context";
 
 const AssignmentUploadScreen = () => {
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const { user } = useUser();
+  console.log("user", user);
 
   const pickDocument = async () => {
     try {

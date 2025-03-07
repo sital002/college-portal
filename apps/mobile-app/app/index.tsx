@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import axois, { isAxiosError } from "axios";
 import {
   Image,
@@ -11,43 +11,55 @@ import {
   Switch,
   Alert,
 } from "react-native";
+import { apiClient } from "@/config/api";
+import { getToken, saveToken } from "@/config/token";
+import { useUser } from "@/context/context";
 
 const Login = () => {
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
   const [isTeacher, setIsTeacher] = useState(true); // Switch state for toggling roles
   const [user, setUser] = useState({
-    email: "",
-    password: "",
+    email: "test@gmail.com",
+    password: "test1234",
   });
-  const API_URL = `http://192.168.61.130:8080/api/v1`;
+
+  const loginHandler = async () => {
+    try {
+      const resp = await apiClient.post("/auth/signin", user);
+      console.log(resp.data);
+      console.log(resp.status);
+      if (resp.status === 200) {
+        Alert.alert("Login Successful", resp.data.data.access_token);
+        saveToken(resp.data.data.access_token);
+        router.replace(isTeacher ? "/teacher" : "/home");
+      } else {
+        Alert.alert("Login Failed");
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   useEffect(() => {
-    axois
-      .post(
-        `${API_URL}/auth/signin`,
-        {
-          email: "test@gmail.com",
-          password: "test1234",
-        },
-        {
-          withCredentials: true,
-        }
-      )
-      .then((response) => {
-        console.log(response);
-        console.log(response.data);
-        Alert.alert("Success", "User logged in successfully!");
-      })
-      .catch((error) => {
-        console.log(isAxiosError(error));
-        if (isAxiosError(error)) {
-          console.log(error.response);
-          // console.log(JSON.stringify(error));
-          return;
-        }
-        console.log("There was an error making the get request!", error);
-      });
+    async function checkToken() {
+      // const token = await getToken();
+      // if (token) {
+      //   router.replace("/home");
+      // } else {
+      //   router.replace("/");
+      // }
+      console.log("checkToken", await getToken());
+
+      const response = await apiClient.get("/auth/me");
+      console.log(response.status);
+      console.log(response);
+    }
+    checkToken();
   }, []);
+  const test = useUser();
+  console.log(test.user);
+
   return (
     <View style={styles.container}>
       <Image
@@ -77,7 +89,7 @@ const Login = () => {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.loginButton}>
+        <TouchableOpacity onPress={loginHandler} style={styles.loginButton}>
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
