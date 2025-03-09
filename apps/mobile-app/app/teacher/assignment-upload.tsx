@@ -10,22 +10,66 @@ import {
 import * as DocumentPicker from "expo-document-picker";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useUser } from "@/context/context";
-
+import { apiClient } from "@/config/api";
+import { isAxiosError } from "axios";
 const AssignmentUploadScreen = () => {
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState<string>("");
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
+  const [selectedFile, setSelectedFile] =
+    useState<DocumentPicker.DocumentPickerAsset>();
   const { user } = useUser();
-  console.log("user", user);
 
   const pickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
       if (result.canceled || !result.assets) return;
-      setSelectedFile(result.assets[0].name);
+
+      const file = result.assets[0];
+      setSelectedFile(file);
+
+      // Convert file to Blob
+
+      // console.log("the blob", blob);
+
+      // const fileBlob = new File([blob], file.name, { type: file.mimeType });
     } catch (error) {
       console.error("Error picking document:", error);
+    }
+  };
+
+  const assignmentUploadHandler = async () => {
+    // console.log(assignmentFile, "assginment file");
+    if (!selectedFile) return;
+    const formData = new FormData();
+    formData.append("title", assignmentTitle);
+    formData.append("description", description);
+    formData.append("deadLine", deadline);
+    formData.append("room", "1");
+
+    if (selectedFile.uri && selectedFile.name && selectedFile.mimeType) {
+      formData.append("file", {
+        uri: selectedFile.uri,
+        name: selectedFile.name,
+        type: selectedFile.mimeType,
+      } as unknown as Blob);
+    }
+    try {
+      const response = await apiClient.post("assignments/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
+
+      console.log("The response", response.data);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        console.log("The error is", error.response?.data.error);
+        return;
+      }
+      console.error("Error uploading assignment:", error);
     }
   };
 
@@ -59,7 +103,6 @@ const AssignmentUploadScreen = () => {
           value={deadline}
           onChangeText={setDeadline}
         />
-
         <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
           <FontAwesome5 name="upload" size={20} color="#fff" />
           <Text style={styles.buttonText}>Choose File</Text>
@@ -68,11 +111,14 @@ const AssignmentUploadScreen = () => {
         {selectedFile && (
           <View style={styles.fileContainer}>
             <FontAwesome5 name="file-alt" size={18} color="green" />
-            <Text style={styles.fileText}>{selectedFile}</Text>
+            <Text style={styles.fileText}>{selectedFile.name}</Text>
           </View>
         )}
 
-        <TouchableOpacity style={styles.submitButton}>
+        <TouchableOpacity
+          onPress={assignmentUploadHandler}
+          style={styles.submitButton}
+        >
           <Text style={styles.submitButtonText}>Submit Assignment</Text>
         </TouchableOpacity>
       </View>
