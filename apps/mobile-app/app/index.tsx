@@ -1,6 +1,5 @@
 import { router } from "expo-router";
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import axois, { isAxiosError } from "axios";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -11,55 +10,54 @@ import {
   Switch,
   Alert,
 } from "react-native";
-import { apiClient } from "@/config/api";
 import { getToken, saveToken } from "@/config/token";
 import { useUser } from "@/context/context";
+// import { apiClient } from "@/config/api";
+import { apiClient, signIn } from "@repo/api";
 
 const Login = () => {
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
   const [isTeacher, setIsTeacher] = useState(true); // Switch state for toggling roles
   const [user, setUser] = useState({
-    email: "teacher@gmail.com",
-    password: "password1",
-    role: isTeacher?"TEACHER":"STUDENT",
+    email: "test@gmail.com",
+    password: "test1234",
+    role: isTeacher ? "TEACHER" : "STUDENT",
   });
 
   const loginHandler = async () => {
     try {
-      const resp = await apiClient.post("/auth/signin", user);
-      console.log(resp.data);
-      console.log(resp.status);
-      if (resp.status === 200) {
-        Alert.alert("Login Successful", resp.data.data.access_token);
-        saveToken(resp.data.data.access_token);
-        router.replace(isTeacher ? "/teacher" : "/home");
-      } else {
-        Alert.alert("Login Failed");
+      const response = await signIn(user.email, user.password);
+      console.log(response);
+      if (response) {
+        // await saveToken(response.access_token);
+        Alert.alert("Login Success " + response.access_token);
+        router.replace("/teacher");
       }
     } catch (error) {
       console.log("error", error);
+      Alert.alert("Login Failed");
     }
   };
 
-  useEffect(() => {
-    async function checkToken() {
-      // const token = await getToken();
-      // if (token) {
-      //   router.replace("/home");
-      // } else {
-      //   router.replace("/");
-      // }
-      console.log("checkToken", await getToken());
+  // useEffect(() => {
+  //   async function checkToken() {
+  //     // const token = await getToken();
+  //     // if (token) {
+  //     //   router.replace("/home");
+  //     // } else {
+  //     //   router.replace("/");
+  //     // }
+  //     console.log("checkToken", await getToken());
 
-      const response = await apiClient.get("/auth/me");
-      console.log(response.status);
-      console.log(response);
-    }
-    checkToken();
-  }, []);
-  const test = useUser();
-  console.log(test.user);
+  //     const response = await apiClient.get("/auth/me");
+  //     console.log(response.status);
+  //     console.log(response);
+  //   }
+  //   checkToken();
+  // }, []);
+  // const test = useUser();
+  // console.log(test.user);
 
   return (
     <View style={styles.container}>

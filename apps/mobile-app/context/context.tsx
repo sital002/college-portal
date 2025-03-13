@@ -1,12 +1,7 @@
-import { apiClient } from "@/config/api";
 import { isAxiosError } from "axios";
 import { router } from "expo-router";
-import React, {
-  createContext,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { apiClient } from "@/config/api";
+import React, { createContext, useLayoutEffect, useState } from "react";
 
 type ContextType = {
   user: User | null;
