@@ -20,17 +20,18 @@ const Login = () => {
   // const [password, setPassword] = useState("");
   const [isTeacher, setIsTeacher] = useState(true); // Switch state for toggling roles
   const [user, setUser] = useState({
-    email: "test@gmail.com",
-    password: "test1234",
+    email: "teacher@gmail.com",
+    password: "password1",
     role: isTeacher ? "TEACHER" : "STUDENT",
   });
 
   const loginHandler = async () => {
+    console.log("click");
     try {
       const response = await signIn(user.email, user.password);
       console.log(response);
       if (response) {
-        // await saveToken(response.access_token);
+        await saveToken(response.access_token);
         Alert.alert("Login Success " + response.access_token);
         router.replace("/teacher");
       }

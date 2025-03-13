@@ -12,6 +12,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useUser } from "@/context/context";
 import { apiClient } from "@/config/api";
 import { isAxiosError } from "axios";
+import { router } from "expo-router";
 const AssignmentUploadScreen = () => {
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -54,7 +55,12 @@ const AssignmentUploadScreen = () => {
       });
 
       console.log("The response", response.data);
-      Alert.alert("Assignment uploaded successfully");
+      Alert.alert("Assignment uploaded successfully", "", [
+        {
+          text: "Ok",
+          onPress:()=> router.push("/teacher/view-assignment"),
+        },
+      ]);
     } catch (error) {
       if (isAxiosError(error)) {
         console.log("The error is", error.response?.data.error);
@@ -117,7 +123,7 @@ const AssignmentUploadScreen = () => {
           onPress={assignmentUploadHandler}
           style={styles.submitButton}
         >
-          <Text style={styles.submitButtonText}>Submit Assignment</Text>
+          <Text style={styles.submitButtonText}>Create Assignment</Text>
         </TouchableOpacity>
       </View>
     </View>

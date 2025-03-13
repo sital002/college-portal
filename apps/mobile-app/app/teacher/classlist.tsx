@@ -74,11 +74,18 @@ const ClassListScreen = () => {
           style={{ marginBottom: 20 }}
           onPress={() => router.push(`/teacher/view-assignment`)}
         >
-          <Text style={{ color: "green",paddingHorizontal:20, }}>View Assignment</Text>
+          <Text style={{ color: "green", paddingHorizontal: 20 }}>
+            View Assignment
+          </Text>
         </TouchableOpacity>
       </View>
-          <Text style={{ color: "#007bff",paddingHorizontal:20 }}>Recent Assignments</Text>
-      <AssignmentListScreen/>
+      <Text
+        onPress={() => router.reload()}
+        style={{ color: "#007bff", paddingHorizontal: 20 }}
+      >
+        Recent Assignments
+      </Text>
+      <AssignmentListScreen />
     </View>
   );
 };

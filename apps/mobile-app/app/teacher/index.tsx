@@ -37,6 +37,13 @@ const menuItems: MenuItem[] = [
     url: "/teacher/classlist",
   },
   {
+    id: "2",
+    title: "Submitted Assignments",
+    icon: "copy",
+    route: "assignments",
+    url: "/teacher/submited-assignments",
+  },
+  {
     id: "3",
     title: "Grade Book",
     icon: "book",

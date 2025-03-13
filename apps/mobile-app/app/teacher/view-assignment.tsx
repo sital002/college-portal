@@ -15,6 +15,8 @@ import {
   Alert,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import { router } from "expo-router";
+import { User, useUser } from "@/context/context";
 
 type FileType = {
   uri: string;
@@ -34,32 +36,7 @@ interface Assignment {
 
 const AssignmentListScreen: React.FC = () => {
   // Sample initial data with file and room fields
-  const [assignments, setAssignments] = useState<Assignment[]>([
-    {
-      id: "1",
-      title: "React Native Basics",
-      description: "Learn the fundamentals of React Native development",
-      deadLine: "2025-03-20",
-      attachments: "react_native_basics.pdf",
-      room: "Lab 101",
-    },
-    {
-      id: "2",
-      title: "TypeScript Integration",
-      description: "Implement TypeScript in a React Native project",
-      deadLine: "2025-03-25",
-      attachments: "typescript_guide.docx",
-      room: "Room 203",
-    },
-    {
-      id: "3",
-      title: "UI/UX Design Principles",
-      description: "Study and apply UI/UX design principles in mobile apps",
-      deadLine: "2025-04-01",
-      attachments: "ui_ux_principles.pptx",
-      room: "Design Studio",
-    },
-  ]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
 
   // State for modals and form data - updated with file and room
   const [viewModalVisible, setViewModalVisible] = useState(false);
@@ -73,13 +50,13 @@ const AssignmentListScreen: React.FC = () => {
     attachments: "",
     room: "",
   });
+  const { user } = useUser();
 
   useEffect(() => {
     const getAssignments = async () => {
       try {
-        const response = await apiClient.get("/assignments/view/52");
+        const response = await apiClient.get("/assignments/view/" + (user as User).id);
 
-        console.log("The response", response.data.data);
         setAssignments(response.data.data);
       } catch (error) {
         if (isAxiosError(error)) {
@@ -97,10 +74,12 @@ const AssignmentListScreen: React.FC = () => {
   const handleView = async (assignment: Assignment) => {
     setViewModalVisible(true);
     try {
-      const response = await apiClient.get("/assignments/viewe/52");
+      const response = await apiClient.get(
+        "/assignments/single/" + assignment.id
+      );
 
       console.log("The response", response.data);
-      //   setSelectedAssignment(assignment);
+      setSelectedAssignment(response.data.data);
     } catch (error) {
       if (isAxiosError(error)) {
         console.log("The error is", error.response?.data.error);
@@ -154,8 +133,20 @@ const AssignmentListScreen: React.FC = () => {
         },
         {
           text: "Delete",
-          onPress: () => {
-            setAssignments(assignments.filter((item) => item.id !== id));
+          onPress: async () => {
+            try {
+              const response = await apiClient.delete(
+                "/assignments/single/" + id
+              );
+
+              setAssignments([...assignments.filter((a) => a.id !== id)]);
+            } catch (error) {
+              if (isAxiosError(error)) {
+                console.log("The error is", error.response?.data.error);
+                return;
+              }
+              console.error("Error uploading assignment:", error);
+            }
           },
           style: "destructive",
         },
@@ -167,9 +158,7 @@ const AssignmentListScreen: React.FC = () => {
   const saveUpdatedAssignment = async () => {
     if (!selectedAssignment) return;
 
-    const updatedAssignments = assignments.map((item) =>
-      item.id === selectedAssignment.id ? { ...item, ...formData } : item
-    );
+    
 
     const updateFormData = new FormData();
     updateFormData.append("title", formData.title);
@@ -180,7 +169,6 @@ const AssignmentListScreen: React.FC = () => {
 
     setUpdateModalVisible(true);
     try {
-      console.log("ready for update>>>>", updateFormData);
       const response = await apiClient.put(
         "/assignments/update/" + selectedAssignment.id,
         updateFormData,
@@ -190,9 +178,9 @@ const AssignmentListScreen: React.FC = () => {
           },
         }
       );
-
-      console.log("The response", response.data);
+      router.push("/teacher/view-assignment");
       //   setSelectedAssignment(assignment);
+      setAssignments([...assignments, response.data.data]);
     } catch (error) {
       if (isAxiosError(error)) {
         console.log("The error is", error.response?.data.error);
@@ -201,7 +189,6 @@ const AssignmentListScreen: React.FC = () => {
       console.error("Error uploading assignment:", error);
     }
 
-    setAssignments(updatedAssignments);
     setUpdateModalVisible(false);
   };
 

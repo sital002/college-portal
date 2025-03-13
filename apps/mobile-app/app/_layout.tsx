@@ -41,6 +41,12 @@ export default function RootLayout() {
             title: "View Assignment",
           }}
         />
+        <Stack.Screen
+          name="teacher/submited-assignments"
+          options={{
+            title: "Submited Assignment",
+          }}
+        />
       </Stack>
     </Context>
   );
