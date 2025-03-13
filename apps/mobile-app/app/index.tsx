@@ -20,8 +20,8 @@ const Login = () => {
   // const [password, setPassword] = useState("");
   const [isTeacher, setIsTeacher] = useState(true); // Switch state for toggling roles
   const [user, setUser] = useState({
-    email: "teacher@gmail.com",
-    password: "password1",
+    email: "test@gmail.com",
+    password: "test1234",
     role: isTeacher ? "TEACHER" : "STUDENT",
   });
 

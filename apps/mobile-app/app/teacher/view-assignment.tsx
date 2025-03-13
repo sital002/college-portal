@@ -16,23 +16,14 @@ import {
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { router } from "expo-router";
-import { User, useUser } from "@/context/context";
-
+import { useUser } from "@/context/context";
+import { type Assignment, viewAllAssignments } from "@repo/api";
+import { getToken } from "@/config/token";
 type FileType = {
   uri: string;
   name: string;
   type: string;
 };
-
-// Define the Assignment type with added file and room fields
-interface Assignment {
-  id: string;
-  title: string;
-  description: string;
-  deadLine: string;
-  attachments: string | FileType; // Added file field
-  room: string; // Added room field
-}
 
 const AssignmentListScreen: React.FC = () => {
   // Sample initial data with file and room fields
@@ -55,9 +46,12 @@ const AssignmentListScreen: React.FC = () => {
   useEffect(() => {
     const getAssignments = async () => {
       try {
-        const response = await apiClient.get("/assignments/view/" + (user as User).id);
-
-        setAssignments(response.data.data);
+        const token = await getToken();
+        if (!token) return;
+        const response = await viewAllAssignments(token);
+        // const response = await apiClient.get("/assignments/view");
+        // console.log(response.data.data);
+        setAssignments(response);
       } catch (error) {
         if (isAxiosError(error)) {
           console.log("The error is", error.response?.data.error);
@@ -157,8 +151,6 @@ const AssignmentListScreen: React.FC = () => {
   // Save updated assignment
   const saveUpdatedAssignment = async () => {
     if (!selectedAssignment) return;
-
-    
 
     const updateFormData = new FormData();
     updateFormData.append("title", formData.title);
