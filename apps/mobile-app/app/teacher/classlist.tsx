@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import AssignmentListScreen from "./view-assignment";
 
 const classes = [
   {
@@ -43,31 +44,47 @@ const classes = [
 const ClassListScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📚 Your Classes</Text>
-      <FlatList
-        data={classes}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.classCard, { backgroundColor: item.color }]}
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <TouchableOpacity>
+          <Text
+            style={{
+              color: "#007bff",
+              marginBottom: 20,
+              fontSize: 16,
+              fontWeight: "bold",
+              backgroundColor: "#f1f1f1",
+              padding: 12,
+              borderRadius: 8,
+              width: "100%",
+              textAlign: "center",
+            }}
             onPress={() => router.push(`/teacher/assignment-upload`)}
           >
-            <View style={styles.iconContainer}>
-              <FontAwesome5 name="chalkboard" size={22} color="#fff" />
-            </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.className}>{item.name}</Text>
-              <Text style={styles.subject}>📖 {item.subject}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+            Create Assignment
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ marginBottom: 20 }}
+          onPress={() => router.push(`/teacher/view-assignment`)}
+        >
+          <Text style={{ color: "green",paddingHorizontal:20, }}>View Assignment</Text>
+        </TouchableOpacity>
+      </View>
+          <Text style={{ color: "#007bff",paddingHorizontal:20 }}>Recent Assignments</Text>
+      <AssignmentListScreen/>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#F8F9FA" },
+  container: { flex: 1, backgroundColor: "#F8F9FA" },
   title: {
     fontSize: 24,
     fontWeight: "bold",

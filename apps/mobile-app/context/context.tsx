@@ -39,7 +39,7 @@ const Context = ({ children }: { children: React.ReactNode }) => {
         if ((await response).data.success) {
           console.log((await response).data.data);
           setUser((await response).data.data);
-          router.replace("/teacher");
+          // router.replace("/teacher");
         }
       } catch (error) {
         if (isAxiosError(error)) {

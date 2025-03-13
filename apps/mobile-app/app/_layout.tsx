@@ -32,7 +32,13 @@ export default function RootLayout() {
         <Stack.Screen
           name="teacher/assignment-upload"
           options={{
-            title: "Upload Assignment",
+            title: "Create Assignment",
+          }}
+        />
+        <Stack.Screen
+          name="teacher/view-assignment"
+          options={{
+            title: "View Assignment",
           }}
         />
       </Stack>
