@@ -20,10 +20,11 @@ const Login = () => {
   // const [password, setPassword] = useState("");
   const [isTeacher, setIsTeacher] = useState(true); // Switch state for toggling roles
   const [user, setUser] = useState({
-    email: "test@gmail.com",
-    password: "test1234",
+    email: "teacher@gmail.com",
+    password: "password1",
     role: isTeacher ? "TEACHER" : "STUDENT",
   });
+  console.log("ip", process.env.SYSTEM_IP);
 
   const loginHandler = async () => {
     console.log("click");
@@ -40,25 +41,6 @@ const Login = () => {
       Alert.alert("Login Failed");
     }
   };
-
-  // useEffect(() => {
-  //   async function checkToken() {
-  //     // const token = await getToken();
-  //     // if (token) {
-  //     //   router.replace("/home");
-  //     // } else {
-  //     //   router.replace("/");
-  //     // }
-  //     console.log("checkToken", await getToken());
-
-  //     const response = await apiClient.get("/auth/me");
-  //     console.log(response.status);
-  //     console.log(response);
-  //   }
-  //   checkToken();
-  // }, []);
-  // const test = useUser();
-  // console.log(test.user);
 
   return (
     <View style={styles.container}>

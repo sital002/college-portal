@@ -17,7 +17,13 @@ import {
 import * as DocumentPicker from "expo-document-picker";
 import { router } from "expo-router";
 import { useUser } from "@/context/context";
-import { type Assignment, viewAllAssignments } from "@repo/api";
+import {
+  type Assignment,
+  deleteAssignment,
+  updateAssignment,
+  viewAllAssignments,
+  viewSingleAssignment,
+} from "@repo/api";
 import { getToken } from "@/config/token";
 type FileType = {
   uri: string;
@@ -68,12 +74,13 @@ const AssignmentListScreen: React.FC = () => {
   const handleView = async (assignment: Assignment) => {
     setViewModalVisible(true);
     try {
-      const response = await apiClient.get(
-        "/assignments/single/" + assignment.id
+      const token = await getToken();
+      const response = await viewSingleAssignment(
+        assignment.id,
+        token as string
       );
 
-      console.log("The response", response.data);
-      setSelectedAssignment(response.data.data);
+      setSelectedAssignment(response);
     } catch (error) {
       if (isAxiosError(error)) {
         console.log("The error is", error.response?.data.error);
@@ -108,7 +115,7 @@ const AssignmentListScreen: React.FC = () => {
           uri: file.uri,
           name: file.name,
           type: file.mimeType as string,
-        },
+        } as unknown as File,
       });
     } catch (error) {
       console.error("Error picking document:", error);
@@ -116,7 +123,7 @@ const AssignmentListScreen: React.FC = () => {
   };
 
   // Handle deleting an assignment
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string | number) => {
     Alert.alert(
       "Delete Assignment",
       "Are you sure you want to delete this assignment?",
@@ -129,9 +136,8 @@ const AssignmentListScreen: React.FC = () => {
           text: "Delete",
           onPress: async () => {
             try {
-              const response = await apiClient.delete(
-                "/assignments/single/" + id
-              );
+              const token = await getToken();
+              const resp = deleteAssignment(id as string, token as string);
 
               setAssignments([...assignments.filter((a) => a.id !== id)]);
             } catch (error) {
@@ -152,30 +158,34 @@ const AssignmentListScreen: React.FC = () => {
   const saveUpdatedAssignment = async () => {
     if (!selectedAssignment) return;
 
-    const updateFormData = new FormData();
-    updateFormData.append("title", formData.title);
-    updateFormData.append("description", formData.description);
-    updateFormData.append("deadLine", formData.deadLine);
-    updateFormData.append("file", formData.attachments as unknown as Blob);
-    updateFormData.append("room", formData.room);
+    // const updateFormData = new FormData();
+    // updateFormData.append("title", formData.title);
+    // updateFormData.append("description", formData.description);
+    // updateFormData.append("deadLine", formData.deadLine);
+    // updateFormData.append("file", formData.attachments as unknown as Blob);
+    // updateFormData.append("room", formData.room);
 
     setUpdateModalVisible(true);
     try {
-      const response = await apiClient.put(
-        "/assignments/update/" + selectedAssignment.id,
-        updateFormData,
+      const token = await getToken();
+      const response = await updateAssignment(
+        selectedAssignment.id,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+          title: formData.title,
+          description: formData.description,
+          deadLine: formData.deadLine,
+          attachments: formData.attachments,
+          room: formData.room,
+        },
+        token as string
       );
+
       router.push("/teacher/view-assignment");
       //   setSelectedAssignment(assignment);
-      setAssignments([...assignments, response.data.data]);
+      setAssignments([...assignments, response]);
     } catch (error) {
       if (isAxiosError(error)) {
-        console.log("The error is", error.response?.data.error);
+        console.log("The error is", error.response?.data);
         return;
       }
       console.error("Error uploading assignment:", error);
@@ -225,7 +235,7 @@ const AssignmentListScreen: React.FC = () => {
       <FlatList
         data={assignments}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id as string}
         contentContainerStyle={styles.listContainer}
       />
 
@@ -359,7 +369,7 @@ const AssignmentListScreen: React.FC = () => {
                 color: "green",
               }}
             >
-              {(formData.attachments as FileType).name ||
+              {(formData.attachments as File).name ||
                 (selectedAssignment?.attachments as string)}
             </Text>
             {/* <TextInput
