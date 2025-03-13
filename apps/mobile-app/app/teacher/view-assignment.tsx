@@ -16,13 +16,19 @@ import {
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 
+type FileType = {
+  uri: string;
+  name: string;
+  type: string;
+};
+
 // Define the Assignment type with added file and room fields
 interface Assignment {
   id: string;
   title: string;
   description: string;
   deadLine: string;
-  attachments: string; // Added file field
+  attachments: string | FileType; // Added file field
   room: string; // Added room field
 }
 
@@ -117,17 +123,24 @@ const AssignmentListScreen: React.FC = () => {
     setUpdateModalVisible(true);
   };
 
- const pickDocument = async () => {
-     try {
-       const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
-       if (result.canceled || !result.assets) return;
- 
-       const file = result.assets[0];
-       setFormData({ ...formData, attachments: file.name });
-     } catch (error) {
-       console.error("Error picking document:", error);
-     }
-   };
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
+      if (result.canceled || !result.assets) return;
+
+      const file = result.assets[0];
+      setFormData({
+        ...formData,
+        attachments: {
+          uri: file.uri,
+          name: file.name,
+          type: file.mimeType as string,
+        },
+      });
+    } catch (error) {
+      console.error("Error picking document:", error);
+    }
+  };
 
   // Handle deleting an assignment
   const handleDelete = (id: string) => {
@@ -158,19 +171,19 @@ const AssignmentListScreen: React.FC = () => {
       item.id === selectedAssignment.id ? { ...item, ...formData } : item
     );
 
-    const formData = new FormData();
-    formData.append("title", selectedAssignment.title);
-    formData.append("description", selectedAssignment.description);
-    formData.append("deadLine", selectedAssignment.deadLine);
-    formData.append("file", selectedAssignment.attachments);
-    formData.append("room", selectedAssignment.room);
+    const updateFormData = new FormData();
+    updateFormData.append("title", formData.title);
+    updateFormData.append("description", formData.description);
+    updateFormData.append("deadLine", formData.deadLine);
+    updateFormData.append("file", formData.attachments as unknown as Blob);
+    updateFormData.append("room", formData.room);
 
     setUpdateModalVisible(true);
     try {
-      console.log("formdata12", formData);
+      console.log("ready for update>>>>", updateFormData);
       const response = await apiClient.put(
         "/assignments/update/" + selectedAssignment.id,
-        formData,
+        updateFormData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -280,7 +293,7 @@ const AssignmentListScreen: React.FC = () => {
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>File:</Text>
                   <Text style={styles.detailValue}>
-                    {selectedAssignment.attachments}
+                    {selectedAssignment.attachments as string}
                   </Text>
                 </View>
 
@@ -319,9 +332,9 @@ const AssignmentListScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 value={formData.title}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, title: text })
-                }
+                onChangeText={(text) => {
+                  setFormData({ ...formData, title: text });
+                }}
                 placeholder="Assignment title"
               />
             </View>
@@ -362,6 +375,14 @@ const AssignmentListScreen: React.FC = () => {
                 <Text style={styles.buttonText}>Choose File</Text>
               </TouchableOpacity>
             </View>
+            <Text
+              style={{
+                color: "green",
+              }}
+            >
+              {(formData.attachments as FileType).name ||
+                (selectedAssignment?.attachments as string)}
+            </Text>
             {/* <TextInput
                 style={styles.input}
                 value={formData.attachments}
