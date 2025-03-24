@@ -1,13 +1,13 @@
-import Sidebar from './components/common/sidebar'
-import { Outlet } from 'react-router'
+import { Outlet } from "react-router";
+import Sidebar from "./components/Sidebar";
 
 const RootLayout = () => {
   return (
-    <div className='flex bg-gray-100'>
-      <Sidebar/>
-      <Outlet/>
+    <div className="flex h-screen ">
+      <Sidebar />
+      <Outlet />
     </div>
-  )
-}
+  );
+};
 
-export default RootLayout
+export default RootLayout;

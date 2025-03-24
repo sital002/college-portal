@@ -34,7 +34,7 @@ const Login = () => {
       if (response) {
         await saveToken(response.access_token);
         Alert.alert("Login Success " + response.access_token);
-        router.replace("/teacher");
+        router.replace("/home");
       }
     } catch (error) {
       console.log("error", error);

@@ -47,6 +47,12 @@ export default function RootLayout() {
             title: "Submited Assignment",
           }}
         />
+        <Stack.Screen
+          name="assignment/pending-assignment"
+          options={{
+            title: "Pending Assignment",
+          }}
+        />
       </Stack>
     </Context>
   );

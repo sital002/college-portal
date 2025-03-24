@@ -1,12 +1,13 @@
+import { unknown } from "zod";
 import { apiClient } from "../apiClient";
 import { ApiResponse, Assignment, assignmentSchema } from "../types";
+import { isAxiosError } from "axios";
 
 export const updateAssignment = async (
   assignmentId: string | number,
   assignment: Omit<Assignment, "id">,
   token?: string
 ) => {
- 
   const formData = new FormData();
   formData.append("title", assignment.title);
   formData.append("description", assignment.description);
@@ -35,16 +36,25 @@ export const updateAssignment = async (
 };
 
 export const viewAllAssignments = async (token?: string) => {
-  const response = await apiClient.get<ApiResponse>(`/assignments/view`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const result = assignmentSchema.array().safeParse(response.data.data);
-  if (!result.success) {
-    throw new Error(result.error.errors[0].message);
+  try {
+    const response = await apiClient.get<ApiResponse>(`/assignments/view`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("response", response);
+    const result = assignmentSchema.array().safeParse(response.data.data);
+    if (!result.success) {
+      throw new Error(result.error.errors[0].message);
+    }
+    return result.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      console.log("The error is", error.response?.data);
+      throw error;
+    }
+    
   }
-  return result.data;
 };
 
 export const deleteAssignment = async (
@@ -83,4 +93,42 @@ export const viewSingleAssignment = async (
     throw new Error(result.error.errors[0].message);
   }
   return result.data;
+};
+
+export const submitAssignment = async (
+  assignmentId: string | number,
+  assignment: any,
+  room: string,
+  token?: string
+) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", {
+      uri: assignment.uri,
+      name: assignment.name,
+      type: assignment.mimeType,
+    } as unknown as Blob);
+    formData.append("room", room);
+    const response = await apiClient.post<ApiResponse>(
+      `/assignments/submit/${assignmentId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    console.log("response", response);
+    const result = assignmentSchema.safeParse(response.data.data);
+    if (!result.success) {
+      throw new Error(result.error.errors[0].message);
+    }
+    return result.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      console.log("The error is", error.response?.data);
+      throw error;
+    }
+  }
 };

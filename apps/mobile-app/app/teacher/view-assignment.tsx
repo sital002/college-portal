@@ -57,7 +57,7 @@ const AssignmentListScreen: React.FC = () => {
         const response = await viewAllAssignments(token);
         // const response = await apiClient.get("/assignments/view");
         // console.log(response.data.data);
-        setAssignments(response);
+        setAssignments(response as Assignment[]);
       } catch (error) {
         if (isAxiosError(error)) {
           console.log("The error is", error.response?.data.error);
