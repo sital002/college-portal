@@ -12,8 +12,10 @@ export const signIn = async (email: string, password: string) => {
     password,
   });
   const result = signInResponseSchema.safeParse(response.data.data);
+
   if (!result.success) {
     throw new Error(result.error.errors[0].message);
   }
+
   return result.data;
 };

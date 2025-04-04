@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Check } from "lucide-react";
 import { apiClient } from "../../../../../packages/api/src";
+import { isAxiosError } from "axios";
 
 interface CourseFormData {
   courseCode: string;
-  courseName: string;
+  name: string;
   description: string;
   // department: string;
   // credits: string;
@@ -22,7 +23,7 @@ interface CourseFormData {
 export default function CourseAddPage() {
   const [formData, setFormData] = useState<CourseFormData>({
     courseCode: "",
-    courseName: "",
+    name: "",
     description: "",
     // department: "",
     // credits: "",
@@ -67,10 +68,18 @@ export default function CourseAddPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // setIsSubmitting(true);
+    try {
+      // setIsSubmitting(true);
 
-    const response = await apiClient.post("/course/new");
-    console.log(response);
+      const response = await apiClient.post("/course/new", formData);
+
+      console.log(response);
+    } catch (error: any) {
+      if (isAxiosError(error)) {
+        console.log("The error is", error);
+        throw error;
+      }
+    }
   };
 
   return (
@@ -121,16 +130,16 @@ export default function CourseAddPage() {
               </label>
               <input
                 type="text"
-                name="courseName"
-                value={formData.courseName}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                  errors.courseName ? "border-red-500" : "border-gray-300"
+                  errors.name ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="e.g. Introduction to Computer Science"
               />
-              {errors.courseName && (
-                <p className="mt-1 text-sm text-red-500">{errors.courseName}</p>
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-500">{errors.name}</p>
               )}
             </div>
 

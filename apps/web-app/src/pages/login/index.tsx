@@ -15,8 +15,8 @@ interface FormErrors {
 
 const AdminLogin: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
+    email: "test@gmail.com",
+    password: "test1234",
     rememberMe: false,
   });
 
@@ -71,8 +71,10 @@ const AdminLogin: React.FC = () => {
     if (!validateForm()) {
       return;
     }
-    const response =await signIn(formData.email, formData.password);
-    console.log(response);
+    const response = await signIn(formData.email, formData.password);
+    if (response.access_token) {
+      localStorage.setItem("access_token", response.access_token);
+    }
 
     // setIsLoading(true);
   };
