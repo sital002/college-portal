@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Check } from "lucide-react";
-import { apiClient } from "../../../../../packages/api/src";
+import { addCourse } from "../../../../../packages/api/src";
 import { isAxiosError } from "axios";
+import { useNavigate } from "react-router";
 
 interface CourseFormData {
   courseCode: string;
@@ -41,6 +42,7 @@ export default function CourseAddPage() {
   const [errors, setErrors] = useState<Partial<CourseFormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const departments = [
     "Mathematics",
@@ -70,10 +72,13 @@ export default function CourseAddPage() {
 
     try {
       // setIsSubmitting(true);
-
-      const response = await apiClient.post("/course/new", formData);
+      const token = (localStorage.getItem("access_token") as string) || "";
+      const response = await addCourse({ ...formData, token });
 
       console.log(response);
+      if (response) {
+        navigate("/course/manage");
+      }
     } catch (error: any) {
       if (isAxiosError(error)) {
         console.log("The error is", error);

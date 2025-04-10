@@ -54,7 +54,7 @@ const AssignmentListScreen: React.FC = () => {
       try {
         const token = await getToken();
         if (!token) return;
-        const response = await viewAllAssignments(token);
+        const response = await viewAllAssignments({token});
         // const response = await apiClient.get("/assignments/view");
         // console.log(response.data.data);
         setAssignments(response as Assignment[]);

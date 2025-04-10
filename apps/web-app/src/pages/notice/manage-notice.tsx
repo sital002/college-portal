@@ -15,157 +15,21 @@ import {
   FileText,
   Clock,
 } from "lucide-react";
+import { getAllNotice } from "@repo/api";
+import { NoticeType } from "../../../../../packages/api/src/types/notice";
 
-interface Notice {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  targetAudience: string[];
-  publishDate: string;
-  expiryDate: string | null;
-  isImportant: boolean;
-  attachments: FileAttachment[];
-  publishedBy: string;
-  publishedAt: string;
-}
 
-interface FileAttachment {
-  id: string;
-  name: string;
-  size: number;
-  type: string;
-  url: string;
-}
 
 // Sample data for demonstration
-const sampleNotices: Notice[] = [
-  {
-    id: "1",
-    title: "End of Term Examination Schedule",
-    description:
-      "The end of term examinations will commence on 15th December 2023. All students are required to check the detailed schedule attached to this notice. Please ensure you arrive at least 15 minutes before the examination starts.",
-    category: "Examination",
-    targetAudience: ["students", "teachers", "parents"],
-    publishDate: "2023-11-30",
-    expiryDate: "2023-12-20",
-    isImportant: true,
-    attachments: [
-      {
-        id: "file-1",
-        name: "Exam_Schedule_Dec2023.pdf",
-        size: 1024 * 1024 * 2.5, // 2.5 MB
-        type: "application/pdf",
-        url: "#",
-      },
-    ],
-    publishedBy: "Dr. John Smith",
-    publishedAt: "2023-11-30T09:30:00",
-  },
-  {
-    id: "2",
-    title: "Annual Sports Day Announcement",
-    description:
-      "We are pleased to announce that the Annual Sports Day will be held on 10th January 2024. All students are encouraged to participate in various sports activities. Parents are cordially invited to attend and support their children.",
-    category: "Sports",
-    targetAudience: ["students", "teachers", "parents", "staff"],
-    publishDate: "2023-12-01",
-    expiryDate: "2024-01-10",
-    isImportant: false,
-    attachments: [
-      {
-        id: "file-2",
-        name: "Sports_Day_Schedule.docx",
-        size: 1024 * 512, // 512 KB
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        url: "#",
-      },
-      {
-        id: "file-3",
-        name: "Registration_Form.pdf",
-        size: 1024 * 256, // 256 KB
-        type: "application/pdf",
-        url: "#",
-      },
-    ],
-    publishedBy: "Prof. Sarah Johnson",
-    publishedAt: "2023-12-01T14:15:00",
-  },
-  {
-    id: "3",
-    title: "Holiday Notice: Winter Break",
-    description:
-      "This is to inform all students, parents, and staff that the school will remain closed for Winter Break from 22nd December 2023 to 5th January 2024. Classes will resume on 6th January 2024. Wishing everyone a happy holiday season!",
-    category: "Holiday",
-    targetAudience: ["students", "teachers", "parents", "staff"],
-    publishDate: "2023-12-05",
-    expiryDate: "2024-01-06",
-    isImportant: true,
-    attachments: [],
-    publishedBy: "Principal Robert Wilson",
-    publishedAt: "2023-12-05T10:00:00",
-  },
-  {
-    id: "4",
-    title: "Parent-Teacher Meeting",
-    description:
-      "A Parent-Teacher Meeting is scheduled for 18th December 2023. Parents are requested to meet with respective class teachers to discuss their child's academic progress. Time slots have been allocated as per the attached schedule.",
-    category: "Academic",
-    targetAudience: ["teachers", "parents"],
-    publishDate: "2023-12-08",
-    expiryDate: "2023-12-18",
-    isImportant: false,
-    attachments: [
-      {
-        id: "file-4",
-        name: "PTM_Schedule.xlsx",
-        size: 1024 * 384, // 384 KB
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        url: "#",
-      },
-    ],
-    publishedBy: "Dr. Emily Davis",
-    publishedAt: "2023-12-08T11:45:00",
-  },
-  {
-    id: "5",
-    title: "New Admission Process for Academic Year 2024-25",
-    description:
-      "Applications for admission to the academic year 2024-25 are now open. Interested candidates can apply online through our website or visit the admission office during working hours. Please refer to the attached brochure for detailed information.",
-    category: "Admission",
-    targetAudience: ["staff"],
-    publishDate: "2023-12-10",
-    expiryDate: null,
-    isImportant: true,
-    attachments: [
-      {
-        id: "file-5",
-        name: "Admission_Brochure_2024.pdf",
-        size: 1024 * 1024 * 5, // 5 MB
-        type: "application/pdf",
-        url: "#",
-      },
-      {
-        id: "file-6",
-        name: "Fee_Structure.pdf",
-        size: 1024 * 768, // 768 KB
-        type: "application/pdf",
-        url: "#",
-      },
-    ],
-    publishedBy: "Admission Committee",
-    publishedAt: "2023-12-10T09:00:00",
-  },
-];
 
 export default function NoticeViewPage() {
-  const [notices, setNotices] = useState<Notice[]>([]);
-  const [filteredNotices, setFilteredNotices] = useState<Notice[]>([]);
+  const [notices, setNotices] = useState<NoticeType[]>([]);
+  const [filteredNotices, setFilteredNotices] = useState<NoticeType[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const [selectedNotice, setSelectedNotice] = useState<NoticeType | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [noticeToDelete, setNoticeToDelete] = useState<Notice | null>(null);
+  const [noticeToDelete, setNoticeToDelete] = useState<NoticeType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterCategory, setFilterCategory] = useState("");
   const [filterAudience, setFilterAudience] = useState("");
@@ -180,9 +44,10 @@ export default function NoticeViewPage() {
     const fetchNotices = async () => {
       setIsLoading(true);
       // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setNotices(sampleNotices);
-      setFilteredNotices(sampleNotices);
+      const token = localStorage.getItem("access_token") as string;
+      const response = await getAllNotice(token);
+      setNotices(response);
+      setFilteredNotices(response);
       setIsLoading(false);
     };
 
@@ -193,54 +58,11 @@ export default function NoticeViewPage() {
   useEffect(() => {
     let result = notices;
 
-    // Apply search filter
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (notice) =>
-          notice.title.toLowerCase().includes(term) ||
-          notice.description.toLowerCase().includes(term) ||
-          notice.category.toLowerCase().includes(term)
-      );
-    }
-
-    // Apply category filter
-    if (filterCategory) {
-      result = result.filter((notice) => notice.category === filterCategory);
-    }
-
-    // Apply audience filter
-    if (filterAudience) {
-      result = result.filter((notice) =>
-        notice.targetAudience.includes(filterAudience)
-      );
-    }
-
-    // Apply important filter
-    if (filterImportant) {
-      if (filterImportant === "important") {
-        result = result.filter((notice) => notice.isImportant);
-      } else if (filterImportant === "regular") {
-        result = result.filter((notice) => !notice.isImportant);
-      }
-    }
-
-    // Sort by importance and then by publish date (newest first)
-    result = [...result].sort((a, b) => {
-      if (a.isImportant !== b.isImportant) {
-        return a.isImportant ? -1 : 1;
-      }
-      return (
-        new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
-      );
-    });
-
     setFilteredNotices(result);
     setCurrentPage(1); // Reset to first page when filters change
   }, [searchTerm, filterCategory, filterAudience, filterImportant, notices]);
 
   // Get unique categories for filter dropdown
-  const categories = [...new Set(notices.map((notice) => notice.category))];
 
   // Pagination logic
   const totalPages = Math.ceil(filteredNotices.length / itemsPerPage);
@@ -250,12 +72,12 @@ export default function NoticeViewPage() {
     startIndex + itemsPerPage
   );
 
-  const handleViewNotice = (notice: Notice) => {
+  const handleViewNotice = (notice: NoticeType) => {
     setSelectedNotice(notice);
     setIsViewModalOpen(true);
   };
 
-  const handleDeleteClick = (notice: Notice) => {
+  const handleDeleteClick = (notice: NoticeType) => {
     setNoticeToDelete(notice);
     setIsDeleteModalOpen(true);
   };
@@ -278,24 +100,6 @@ export default function NoticeViewPage() {
     setIsFilterOpen(false);
   };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-    else return (bytes / 1048576).toFixed(1) + " MB";
-  };
-
-  const getFileIcon = (type: string) => {
-    if (type.startsWith("image/")) return "📷";
-    if (type.startsWith("video/")) return "🎬";
-    if (type.startsWith("audio/")) return "🎵";
-    if (type.includes("pdf")) return "📄";
-    if (type.includes("word") || type.includes("document")) return "📝";
-    if (type.includes("excel") || type.includes("sheet")) return "📊";
-    if (type.includes("powerpoint") || type.includes("presentation"))
-      return "📊";
-    return "📁";
-  };
-
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -314,21 +118,6 @@ export default function NoticeViewPage() {
       minute: "2-digit",
     };
     return new Date(dateTimeString).toLocaleString(undefined, options);
-  };
-
-  const getAudienceLabel = (audience: string) => {
-    switch (audience) {
-      case "students":
-        return "Students";
-      case "teachers":
-        return "Teachers";
-      case "parents":
-        return "Parents";
-      case "staff":
-        return "Staff";
-      default:
-        return audience;
-    }
   };
 
   return (
@@ -377,24 +166,6 @@ export default function NoticeViewPage() {
           {isFilterOpen && (
             <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
               <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={filterCategory}
-                    onChange={(e) => setFilterCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  >
-                    <option value="">All Categories</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Target Audience
@@ -459,55 +230,21 @@ export default function NoticeViewPage() {
           ) : (
             <div className="divide-y divide-gray-200">
               {paginatedNotices.map((notice) => (
-                <div
-                  key={notice.id}
-                  className={`p-6 ${notice.isImportant ? "bg-amber-50" : ""}`}
-                >
+                <div key={notice.id} className={`p-6  "bg-amber-50" : ""}`}>
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {notice.isImportant && (
-                          <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full flex items-center">
-                            <Bell className="h-3 w-3 mr-1" />
-                            Important
-                          </span>
-                        )}
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                          {notice.category}
-                        </span>
-                      </div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         {notice.title}
                       </h3>
                       <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                        {notice.description}
+                        {notice.content}
                       </p>
 
                       <div className="mt-3 flex flex-wrap items-center text-xs text-gray-500 gap-x-4 gap-y-2">
                         <div className="flex items-center">
                           <Calendar className="h-3.5 w-3.5 mr-1" />
-                          Published: {formatDate(notice.publishDate)}
+                          Published: {formatDate(notice.createdDate)}
                         </div>
-                        {notice.expiryDate && (
-                          <div className="flex items-center">
-                            <Clock className="h-3.5 w-3.5 mr-1" />
-                            Expires: {formatDate(notice.expiryDate)}
-                          </div>
-                        )}
-                        <div className="flex items-center">
-                          <Users className="h-3.5 w-3.5 mr-1" />
-                          For:{" "}
-                          {notice.targetAudience
-                            .map(getAudienceLabel)
-                            .join(", ")}
-                        </div>
-                        {notice.attachments.length > 0 && (
-                          <div className="flex items-center">
-                            <FileText className="h-3.5 w-3.5 mr-1" />
-                            {notice.attachments.length} attachment
-                            {notice.attachments.length !== 1 ? "s" : ""}
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -653,18 +390,6 @@ export default function NoticeViewPage() {
 
             <div className="p-6">
               <div className="flex flex-col gap-6">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  {selectedNotice.isImportant && (
-                    <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full flex items-center">
-                      <Bell className="h-3 w-3 mr-1" />
-                      Important
-                    </span>
-                  )}
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                    {selectedNotice.category}
-                  </span>
-                </div>
-
                 <div>
                   <h3 className="text-2xl font-bold text-gray-800">
                     {selectedNotice.title}
@@ -672,20 +397,7 @@ export default function NoticeViewPage() {
                   <div className="mt-2 flex flex-wrap items-center text-xs text-gray-500 gap-x-4 gap-y-2">
                     <div className="flex items-center">
                       <Calendar className="h-3.5 w-3.5 mr-1" />
-                      Published: {formatDate(selectedNotice.publishDate)}
-                    </div>
-                    {selectedNotice.expiryDate && (
-                      <div className="flex items-center">
-                        <Clock className="h-3.5 w-3.5 mr-1" />
-                        Expires: {formatDate(selectedNotice.expiryDate)}
-                      </div>
-                    )}
-                    <div className="flex items-center">
-                      <Users className="h-3.5 w-3.5 mr-1" />
-                      For:{" "}
-                      {selectedNotice.targetAudience
-                        .map(getAudienceLabel)
-                        .join(", ")}
+                      Published: {formatDate(selectedNotice.createdDate)}
                     </div>
                   </div>
                 </div>
@@ -695,51 +407,14 @@ export default function NoticeViewPage() {
                     Description
                   </h4>
                   <div className="bg-gray-50 p-4 rounded-lg text-gray-700 whitespace-pre-line">
-                    {selectedNotice.description}
+                    {selectedNotice.content}
                   </div>
                 </div>
 
-                {selectedNotice.attachments.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">
-                      Attachments
-                    </h4>
-                    <div className="space-y-2">
-                      {selectedNotice.attachments.map((file) => (
-                        <div
-                          key={file.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg"
-                        >
-                          <div className="flex items-center">
-                            <span className="text-xl mr-2">
-                              {getFileIcon(file.type)}
-                            </span>
-                            <div>
-                              <p className="text-sm font-medium text-gray-700">
-                                {file.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {formatFileSize(file.size)}
-                              </p>
-                            </div>
-                          </div>
-                          <a
-                            href={file.url}
-                            download={file.name}
-                            className="text-blue-500 hover:text-blue-700 p-1"
-                          >
-                            <Download className="h-4 w-4" />
-                          </a>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 <div className="text-xs text-gray-500 border-t pt-4">
-                  <p>Published by: {selectedNotice.publishedBy}</p>
+                  <p>Published by: {selectedNotice.createdBy}</p>
                   <p>
-                    Published at: {formatDateTime(selectedNotice.publishedAt)}
+                    Published at: {formatDateTime(selectedNotice.createdDate)}
                   </p>
                 </div>
               </div>

@@ -35,7 +35,7 @@ export const updateAssignment = async (
   return result.data;
 };
 
-export const viewAllAssignments = async (token?: string) => {
+export const viewAllAssignments = async ({ token }: { token: string }) => {
   try {
     const response = await apiClient.get<ApiResponse>(`/assignments/view`, {
       headers: {
@@ -53,7 +53,6 @@ export const viewAllAssignments = async (token?: string) => {
       console.log("The error is", error.response?.data);
       throw error;
     }
-    
   }
 };
 

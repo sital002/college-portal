@@ -43,7 +43,7 @@ export const PendingAssignments: React.FC = () => {
     async function fetchAssignments() {
       const token = await getToken();
       if (token) {
-        const allAssignments = await viewAllAssignments(token);
+        const allAssignments = await viewAllAssignments({token});
         console.log(allAssignments);
         setAssignments(allAssignments as Assignment[]);
       }
