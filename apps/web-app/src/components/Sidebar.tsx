@@ -155,6 +155,15 @@ export default function Sidebar() {
                 { text: "Manage Courses", href: "/course/manage" },
               ]}
             />
+            <NavItem
+              icon={BookOpen}
+              text="Books"
+              hasSubmenu
+              submenuItems={[
+                { text: "Add Book", href: "/book/add" },
+                { text: "Manage Books", href: "/book/manage" },
+              ]}
+            />
 
             <NavItem
               icon={ClipboardCheck}

@@ -10,6 +10,8 @@ import CourseViewPage from "./pages/course/manage-course";
 import NoticePublishPage from "./pages/notice/notice-publish";
 import NoticeViewPage from "./pages/notice/manage-notice";
 import AdminLogin from "./pages/login";
+import BookAddPage from "./pages/book/add-book";
+import BookViewPage from "./pages/book/manage-book";
 
 const App = () => {
   return (
@@ -21,6 +23,8 @@ const App = () => {
         <Route path="student/manage" element={<StudentViewPage />} />
         <Route path="student/add" element={<StudentAddPage />} />
         <Route path="course/add" element={<CourseAddPage />} />
+        <Route path="book/add" element={<BookAddPage />} />
+        <Route path="book/manage" element={<BookViewPage />} />
         <Route path="course/manage" element={<CourseViewPage />} />
         <Route path="notice/publish" element={<NoticePublishPage />} />
         <Route path="notice/manage" element={<NoticeViewPage />} />
